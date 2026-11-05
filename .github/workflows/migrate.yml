@@ -27,12 +27,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Run Flyway Migrations
-        uses: redgate/flyway-action@v1
+      - name: Setup Flyway
+        uses: red-gate/setup-flyway@v3
         with:
-          args: migrate
-          locations: filesystem:./sql/migrations
-        env:
-          FLYWAY_URL: jdbc:postgresql://localhost:5432/mydb
-          FLYWAY_USER: user
-          FLYWAY_PASSWORD: password
+          edition: 'community'
+          i-agree-to-the-eula: true
+
+      - name: Run Migrations
+        run: |
+          flyway migrate \
+            -url="jdbc:postgresql://localhost:5432/mydb" \
+            -user="user" \
+            -password="password" \
+            -locations="filesystem:./sql/migrations"
