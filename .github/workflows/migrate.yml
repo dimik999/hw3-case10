@@ -1,0 +1,38 @@
+name: Database Migrations
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mydb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Run Flyway Migrations
+        uses: redgate/flyway-action@v1
+        with:
+          args: migrate
+          locations: filesystem:./sql/migrations
+        env:
+          FLYWAY_URL: jdbc:postgresql://localhost:5432/mydb
+          FLYWAY_USER: user
+          FLYWAY_PASSWORD: password
